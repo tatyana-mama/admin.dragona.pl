@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dragona — Panel Administracyjny</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f5f0e8;
+  --clay: #c4956a;
+  --clay2: #d4a574;
+  --terra: #8b5e3c;
+  --dark: #1a1410;
+  --dark2: #2d2419;
+  --dark3: #231c14;
+  --moss: #4a5240;
+  --sand: #e8dcc8;
+  --sand2: #ddd0b8;
+  --muted: rgba(245,240,232,0.45);
+  --success: #5a9a6a;
+  --warning: #d4a534;
+  --danger: #c45a5a;
+  --sidebar-w: 260px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark);
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--dark3);
+  border-right: 1px solid rgba(245,240,232,0.06);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.sidebar-logo {
+  padding: 28px 24px;
+  border-bottom: 1px solid rgba(245,240,232,0.06);
+}
+.sidebar-logo a {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cream);
+  text-decoration: none;
+}
+.sidebar-logo em { color: var(--clay); font-style: italic; }
+.sidebar-logo .admin-badge {
+  display: inline-block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: rgba(196,149,106,0.15);
+  color: var(--clay);
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+.nav-section-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.25);
+  padding: 20px 24px 8px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 24px;
+  color: rgba(245,240,232,0.5);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  position: relative;
+}
+.nav-item:hover {
+  color: var(--cream);
+  background: rgba(245,240,232,0.04);
+}
+.nav-item.active {
+  color: var(--clay);
+  background: rgba(196,149,106,0.08);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 3px;
+  background: var(--clay);
+  border-radius: 0 4px 4px 0;
+}
+.nav-item .icon {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+}
+.nav-item .badge {
+  margin-left: auto;
+  background: var(--clay);
+  color: var(--cream);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(245,240,232,0.06);
+}
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-avatar {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--clay), var(--terra));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cream);
+}
+.sidebar-user-info .name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cream);
+}
+.sidebar-user-info .role {
+  font-size: 0.65rem;
+  color: rgba(245,240,232,0.35);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ========== MOBILE HAMBURGER ========== */
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--dark3);
+  border-bottom: 1px solid rgba(245,240,232,0.06);
+  z-index: 110;
+  align-items: center;
+  padding: 0 16px;
+  justify-content: space-between;
+}
+.hamburger {
+  background: none;
+  border: none;
+  color: var(--cream);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px;
+}
+.mobile-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: var(--cream);
+}
+.mobile-logo em { color: var(--clay); font-style: italic; }
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 99;
+}
+.overlay.show { display: block; }
+
+/* ========== MAIN CONTENT ========== */
+.main {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--dark2);
+}
+
+.topbar {
+  padding: 20px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(245,240,232,0.06);
+  background: var(--dark);
+}
+.topbar-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+}
+.topbar-title em { color: var(--clay); font-style: italic; }
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar-btn {
+  background: rgba(245,240,232,0.05);
+  border: 1px solid rgba(245,240,232,0.08);
+  color: var(--cream);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.topbar-btn:hover { background: rgba(245,240,232,0.08); }
+.topbar-btn .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+/* ========== CONTENT AREA ========== */
+.content {
+  padding: 32px 36px;
+}
+
+/* === STATS CARDS === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--dark);
+  border: 1px solid rgba(245,240,232,0.06);
+  border-radius: 12px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.stat-card:hover {
+  border-color: rgba(196,149,106,0.2);
+  transform: translateY(-2px);
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--clay), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.stat-card:hover::after { opacity: 1; }
+.stat-icon {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+.stat-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--clay);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.4);
+  margin-top: 6px;
+}
+.stat-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.stat-change.up { color: var(--success); background: rgba(90,154,106,0.12); }
+.stat-change.down { color: var(--danger); background: rgba(196,90,90,0.12); }
+
+/* === SECTION PANELS === */
+.panel {
+  display: none;
+}
+.panel.active {
+  display: block;
+}
+
+/* === TABLE === */
+.table-wrapper {
+  background: var(--dark);
+  border: 1px solid rgba(245,240,232,0.06);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.table-header {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(245,240,232,0.06);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.table-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+.table-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 6px 14px;
+  background: rgba(245,240,232,0.04);
+  border: 1px solid rgba(245,240,232,0.08);
+  color: rgba(245,240,232,0.5);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: rgba(196,149,106,0.12);
+  border-color: rgba(196,149,106,0.3);
+  color: var(--clay);
+}
+.search-input {
+  padding: 8px 14px;
+  background: rgba(245,240,232,0.04);
+  border: 1px solid rgba(245,240,232,0.08);
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  border-radius: 6px;
+  outline: none;
+  width: 200px;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: rgba(196,149,106,0.4); }
+.search-input::placeholder { color: rgba(245,240,232,0.2); }
+
+.table-scroll { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.3);
+  background: rgba(245,240,232,0.02);
+  white-space: nowrap;
+}
+td {
+  padding: 14px 20px;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(245,240,232,0.04);
+  color: rgba(245,240,232,0.7);
+  white-space: nowrap;
+}
+tr:hover td {
+  background: rgba(245,240,232,0.02);
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.status-new {
+  background: rgba(196,149,106,0.15);
+  color: var(--clay);
+}
+.status-confirmed {
+  background: rgba(90,154,106,0.15);
+  color: var(--success);
+}
+.status-done {
+  background: rgba(245,240,232,0.08);
+  color: rgba(245,240,232,0.4);
+}
+.status-cancelled {
+  background: rgba(196,90,90,0.12);
+  color: var(--danger);
+}
+.td-name {
+  font-weight: 600;
+  color: var(--cream);
+}
+.td-workshop {
+  color: var(--clay);
+  font-weight: 500;
+}
+.row-actions {
+  display: flex;
+  gap: 6px;
+}
+.row-action {
+  width: 30px; height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245,240,232,0.04);
+  border: 1px solid rgba(245,240,232,0.06);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  color: var(--cream);
+}
+.row-action:hover {
+  background: rgba(196,149,106,0.12);
+  border-color: rgba(196,149,106,0.3);
+}
+.row-action.danger:hover {
+  background: rgba(196,90,90,0.12);
+  border-color: rgba(196,90,90,0.3);
+}
+
+/* === REQUEST DETAIL MODAL === */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.show {
+  display: flex;
+}
+.modal {
+  background: var(--dark);
+  border: 1px solid rgba(245,240,232,0.08);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn 0.3s ease;
+}
+@keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } }
+.modal-head {
+  padding: 24px;
+  border-bottom: 1px solid rgba(245,240,232,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-head h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: rgba(245,240,232,0.4);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: var(--cream); }
+.modal-body { padding: 24px; }
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(245,240,232,0.04);
+  gap: 16px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.3);
+  min-width: 100px;
+}
+.detail-value {
+  font-size: 0.88rem;
+  color: var(--cream);
+  text-align: right;
+  word-break: break-word;
+}
+.modal-actions {
+  padding: 20px 24px;
+  border-top: 1px solid rgba(245,240,232,0.06);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.modal-btn {
+  flex: 1;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  min-width: 120px;
+  text-align: center;
+}
+.modal-btn.primary {
+  background: var(--clay);
+  color: var(--cream);
+}
+.modal-btn.primary:hover { background: var(--terra); }
+.modal-btn.secondary {
+  background: rgba(245,240,232,0.06);
+  color: var(--cream);
+  border: 1px solid rgba(245,240,232,0.1);
+}
+.modal-btn.secondary:hover { background: rgba(245,240,232,0.1); }
+.modal-btn.danger {
+  background: rgba(196,90,90,0.15);
+  color: var(--danger);
+}
+.modal-btn.danger:hover { background: rgba(196,90,90,0.25); }
+
+/* === TELEGRAM SETTINGS === */
+.settings-card {
+  background: var(--dark);
+  border: 1px solid rgba(245,240,232,0.06);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 20px;
+}
+.settings-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.settings-card p {
+  font-size: 0.85rem;
+  color: rgba(245,240,232,0.45);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.settings-form-group {
+  margin-bottom: 18px;
+}
+.settings-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.35);
+  margin-bottom: 8px;
+}
+.settings-input {
+  width: 100%;
+  max-width: 420px;
+  padding: 12px 16px;
+  background: rgba(245,240,232,0.04);
+  border: 1px solid rgba(245,240,232,0.1);
+  color: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.settings-input:focus { border-color: rgba(196,149,106,0.5); }
+.settings-input::placeholder { color: rgba(245,240,232,0.2); }
+.settings-hint {
+  font-size: 0.75rem;
+  color: rgba(245,240,232,0.3);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.settings-btn {
+  padding: 12px 28px;
+  background: var(--clay);
+  color: var(--cream);
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s;
+  margin-top: 8px;
+}
+.settings-btn:hover { background: var(--terra); }
+.tg-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.tg-status.connected {
+  background: rgba(90,154,106,0.12);
+  color: var(--success);
+}
+.tg-status.disconnected {
+  background: rgba(196,90,90,0.1);
+  color: var(--danger);
+}
+.tg-step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+.tg-step-num {
+  width: 28px; height: 28px;
+  min-width: 28px;
+  background: rgba(196,149,106,0.12);
+  color: var(--clay);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.tg-step-text {
+  font-size: 0.85rem;
+  color: rgba(245,240,232,0.6);
+  line-height: 1.6;
+  padding-top: 3px;
+}
+.tg-step-text code {
+  background: rgba(245,240,232,0.06);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  color: var(--clay);
+}
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.toggle {
+  width: 44px; height: 24px;
+  background: rgba(245,240,232,0.1);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.toggle.on { background: var(--clay); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  background: var(--cream);
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+.toggle.on::after { transform: translateX(20px); }
+.toggle-label {
+  font-size: 0.85rem;
+  color: rgba(245,240,232,0.6);
+}
+
+/* === NOTIFICATION TOAST === */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--dark);
+  border: 1px solid rgba(245,240,232,0.1);
+  border-radius: 12px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  z-index: 300;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.35s;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  max-width: 340px;
+}
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+.toast-icon { font-size: 1.2rem; }
+.toast-text { color: rgba(245,240,232,0.8); font-weight: 500; }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1200px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .mobile-header {
+    display: flex;
+  }
+  .main {
+    margin-left: 0;
+    padding-top: 56px;
+  }
+  .topbar {
+    display: none;
+  }
+  .content {
+    padding: 20px 16px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-card { padding: 16px; }
+  .stat-number { font-size: 1.6rem; }
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .search-input { width: 100%; }
+  .settings-card { padding: 20px; }
+  .settings-input { max-width: 100%; }
+  .modal { margin: 10px; border-radius: 12px; }
+  .modal-actions { flex-direction: column; }
+  .modal-btn { min-width: unset; }
+  .toast { left: 16px; right: 16px; max-width: unset; bottom: 16px; }
+
+  /* Mobile table cards view */
+  .mobile-cards { display: block; }
+  .desktop-table { display: none; }
+  .m-card {
+    background: rgba(245,240,232,0.02);
+    border: 1px solid rgba(245,240,232,0.06);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .m-card:hover { border-color: rgba(196,149,106,0.2); }
+  .m-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .m-card-name { font-weight: 600; color: var(--cream); font-size: 0.9rem; }
+  .m-card-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: rgba(245,240,232,0.45);
+    margin-top: 6px;
+  }
+  .m-card-workshop { color: var(--clay); font-weight: 500; }
+}
+
+@media (min-width: 769px) {
+  .mobile-cards { display: none; }
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(245,240,232,0.3);
+}
+.empty-state .icon { font-size: 3rem; margin-bottom: 16px; }
+.empty-state p { font-size: 0.9rem; }
+</style>
+</head>
+<body>
+
+<!-- MOBILE HEADER -->
+<div class="mobile-header">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <div class="mobile-logo"><em>Dragona</em></div>
+  <button class="hamburger" style="visibility:hidden">☰</button>
+</div>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <a href="#"><em>Dragona</em> <span class="admin-badge">Admin</span></a>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Główne</div>
+    <button class="nav-item active" onclick="showPanel('dashboard', this)">
+      <span class="icon">📊</span> Dashboard
+    </button>
+    <button class="nav-item" onclick="showPanel('requests', this)">
+      <span class="icon">📩</span> Zaявки
+      <span class="badge" id="newRequestsBadge">3</span>
+    </button>
+    <button class="nav-item" onclick="showPanel('workshops', this)">
+      <span class="icon">🏺</span> Warsztaty
+    </button>
+
+    <div class="nav-section-label">Ustawienia</div>
+    <button class="nav-item" onclick="showPanel('telegram', this)">
+      <span class="icon">✈️</span> Telegram Bot
+    </button>
+    <button class="nav-item" onclick="showPanel('settings', this)">
+      <span class="icon">⚙️</span> Ustawienia
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">DD</div>
+      <div class="sidebar-user-info">
+        <div class="name">Daria Dragun</div>
+        <div class="role">Administrator</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Panel <em>administracyjny</em></div>
+    <div class="topbar-actions">
+      <button class="topbar-btn" onclick="showPanel('telegram', document.querySelectorAll('.nav-item')[3])">
+        <span class="dot"></span> Telegram
+      </button>
+      <a href="dragona__1_.html" class="topbar-btn" target="_blank">🌐 Strona</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== DASHBOARD PANEL ===== -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📩</div>
+          <div class="stat-number" id="stat-total">12</div>
+          <div class="stat-label">Wszystkie zaявки</div>
+          <div class="stat-change up">↑ +3 ten tydzień</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🆕</div>
+          <div class="stat-number" id="stat-new">3</div>
+          <div class="stat-label">Nowe</div>
+          <div class="stat-change up">↑ Oczekują</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-number" id="stat-confirmed">7</div>
+          <div class="stat-label">Potwierdzone</div>
+          <div class="stat-change up">↑ +2 ten tydzień</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-number" id="stat-revenue">3 450</div>
+          <div class="stat-label">Przychód (zł)</div>
+          <div class="stat-change up">↑ +15%</div>
+        </div>
+      </div>
+
+      <!-- Recent requests mini-table -->
+      <div class="table-wrapper">
+        <div class="table-header">
+          <div class="table-title">Ostatnie zaявки</div>
+          <button class="filter-btn active" onclick="showPanel('requests', document.querySelectorAll('.nav-item')[1])">Zobacz wszystkie →</button>
+        </div>
+        <div class="table-scroll desktop-table" id="dashboardTable"></div>
+        <div class="mobile-cards" id="dashboardCards"></div>
+      </div>
+    </div>
+
+    <!-- ===== REQUESTS PANEL ===== -->
+    <div class="panel" id="panel-requests">
+      <div class="table-wrapper">
+        <div class="table-header">
+          <div class="table-title">Wszystkie заявки</div>
+          <div class="table-filters">
+            <input type="text" class="search-input" placeholder="Szukaj..." id="searchInput" oninput="renderRequests()">
+            <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Wszystkie</button>
+            <button class="filter-btn" data-filter="new" onclick="setFilter('new', this)">Nowe</button>
+            <button class="filter-btn" data-filter="confirmed" onclick="setFilter('confirmed', this)">Potwierdzone</button>
+            <button class="filter-btn" data-filter="done" onclick="setFilter('done', this)">Zrealizowane</button>
+            <button class="filter-btn" data-filter="cancelled" onclick="setFilter('cancelled', this)">Anulowane</button>
+          </div>
+        </div>
+        <div class="table-scroll desktop-table" id="requestsTable"></div>
+        <div class="mobile-cards" id="requestsCards"></div>
+      </div>
+    </div>
+
+    <!-- ===== WORKSHOPS PANEL ===== -->
+    <div class="panel" id="panel-workshops">
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+        <div class="stat-card">
+          <div class="stat-icon">🌿</div>
+          <div class="stat-number">4</div>
+          <div class="stat-label">Mała Pracownia</div>
+          <div class="stat-change up">↑ Popularne</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🌊</div>
+          <div class="stat-number">3</div>
+          <div class="stat-label">Dzień z gliną</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🕯️</div>
+          <div class="stat-number">5</div>
+          <div class="stat-label">Wieczór ceramiczny</div>
+          <div class="stat-change up">↑ TOP</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🤝</div>
+          <div class="stat-number">2</div>
+          <div class="stat-label">Rodzina w glinie</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-number">1</div>
+          <div class="stat-label">Kurs podstawowy</div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h3>Cennik warsztatów</h3>
+        <p>Obecny cennik wyświetlany na stronie. Aby zmienić ceny, edytuj plik strony.</p>
+        <table style="width:100%;max-width:500px;">
+          <tr><td style="padding:8px 0;color:var(--clay);border-top:1px solid rgba(245,240,232,0.06);">Mała Pracownia</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(245,240,232,0.06);">150 zł / dziecko</td></tr>
+          <tr><td style="padding:8px 0;color:var(--clay);border-top:1px solid rgba(245,240,232,0.06);">Dzień z gliną</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(245,240,232,0.06);">250 zł / osoba</td></tr>
+          <tr><td style="padding:8px 0;color:var(--clay);border-top:1px solid rgba(245,240,232,0.06);">Wieczór ceramiczny</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(245,240,232,0.06);">200 zł / osoba</td></tr>
+          <tr><td style="padding:8px 0;color:var(--clay);border-top:1px solid rgba(245,240,232,0.06);">Rodzina w glinie</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(245,240,232,0.06);">350 zł / rodzina</td></tr>
+          <tr><td style="padding:8px 0;color:var(--clay);border-top:1px solid rgba(245,240,232,0.06);">Kurs podstawowy</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(245,240,232,0.06);">900 zł / kurs</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== TELEGRAM PANEL ===== -->
+    <div class="panel" id="panel-telegram">
+      <div class="settings-card">
+        <h3>🤖 Telegram — уведомления о заявках</h3>
+        <p>Привяжите Telegram-бота, чтобы получать мгновенные уведомления о новых заявках с сайта.</p>
+
+        <div class="tg-status disconnected" id="tgStatus">
+          ⚠️ Telegram не подключён
+        </div>
+
+        <div style="margin-bottom:28px;">
+          <div style="font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.5);margin-bottom:14px;">Инструкция по настройке</div>
+          <div class="tg-step">
+            <div class="tg-step-num">1</div>
+            <div class="tg-step-text">Откройте Telegram и найдите <code>@BotFather</code></div>
+          </div>
+          <div class="tg-step">
+            <div class="tg-step-num">2</div>
+            <div class="tg-step-text">Отправьте <code>/newbot</code> и следуйте инструкциям. Получите <strong style="color:var(--clay)">API Token</strong></div>
+          </div>
+          <div class="tg-step">
+            <div class="tg-step-num">3</div>
+            <div class="tg-step-text">Откройте бота и отправьте ему любое сообщение. Затем перейдите по ссылке: <code>https://api.telegram.org/bot{TOKEN}/getUpdates</code> — найдите свой <strong style="color:var(--clay)">Chat ID</strong></div>
+          </div>
+          <div class="tg-step">
+            <div class="tg-step-num">4</div>
+            <div class="tg-step-text">Вставьте Token и Chat ID ниже и нажмите «Подключить»</div>
+          </div>
+        </div>
+
+        <div class="settings-form-group">
+          <label class="settings-label">Bot Token</label>
+          <input type="text" class="settings-input" id="tgToken" placeholder="123456789:ABCdefGHIjklMNO...">
+          <div class="settings-hint">Токен от @BotFather</div>
+        </div>
+        <div class="settings-form-group">
+          <label class="settings-label">Chat ID</label>
+          <input type="text" class="settings-input" id="tgChatId" placeholder="123456789">
+          <div class="settings-hint">Ваш Telegram Chat ID (числовой)</div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+          <button class="settings-btn" onclick="connectTelegram()">🔗 Подключить</button>
+          <button class="settings-btn" style="background:rgba(245,240,232,0.06);border:1px solid rgba(245,240,232,0.1);" onclick="testTelegram()">📤 Тест уведомления</button>
+        </div>
+
+        <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(245,240,232,0.06);">
+          <div style="font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.5);margin-bottom:14px;">Настройки уведомлений</div>
+          <div class="toggle-wrap">
+            <div class="toggle on" id="tgNotifNew" onclick="this.classList.toggle('on')"></div>
+            <span class="toggle-label">Новая заявка</span>
+          </div>
+          <div class="toggle-wrap">
+            <div class="toggle on" id="tgNotifStatus" onclick="this.classList.toggle('on')"></div>
+            <span class="toggle-label">Изменение статуса</span>
+          </div>
+          <div class="toggle-wrap">
+            <div class="toggle" id="tgNotifDaily" onclick="this.classList.toggle('on')"></div>
+            <span class="toggle-label">Ежедневная сводка (9:00)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS PANEL ===== -->
+    <div class="panel" id="panel-settings">
+      <div class="settings-card">
+        <h3>Общие настройки</h3>
+        <p>Основные настройки панели администрирования.</p>
+        <div class="settings-form-group">
+          <label class="settings-label">Имя администратора</label>
+          <input type="text" class="settings-input" value="Daria Dragun">
+        </div>
+        <div class="settings-form-group">
+          <label class="settings-label">Email для уведомлений</label>
+          <input type="email" class="settings-input" placeholder="dragona@email.com">
+        </div>
+        <div class="settings-form-group">
+          <label class="settings-label">Телефон</label>
+          <input type="tel" class="settings-input" placeholder="+48 000 000 000">
+        </div>
+        <button class="settings-btn" onclick="showToast('✅','Настройки сохранены')">Сохранить</button>
+      </div>
+
+      <div class="settings-card">
+        <h3>Интеграция с сайтом</h3>
+        <p>Добавьте этот скрипт в файл вашего сайта dragona.html, чтобы заявки с формы отправлялись в Telegram и сохранялись в админке.</p>
+        <div style="background:rgba(245,240,232,0.03);border:1px solid rgba(245,240,232,0.08);border-radius:8px;padding:16px;overflow-x:auto;">
+          <pre style="color:var(--clay);font-size:0.78rem;line-height:1.7;white-space:pre-wrap;word-break:break-all;"><code>// Вставьте в функцию submitForm() в dragona.html:
+
+function submitForm() {
+  const name = document.querySelector('input[placeholder="Anna Kowalska"]').value;
+  const phone = document.querySelector('input[type="tel"]').value;
+  const email = document.querySelector('input[type="email"]').value;
+  const workshop = document.querySelector('select').value;
+  const date = document.querySelector('input[type="date"]').value;
+  const persons = document.querySelector('input[type="number"]').value;
+  const message = document.querySelector('textarea').value;
+
+  // Отправка в Telegram
+  const TOKEN = 'ВАШ_BOT_TOKEN';
+  const CHAT_ID = 'ВАШ_CHAT_ID';
+  const text = `📩 Нова заявка!\n\n👤 ${name}\n📱 ${phone}\n✉️ ${email}\n🏺 ${workshop}\n📅 ${date}\n👥 ${persons} os.\n💬 ${message}`;
+
+  fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({chat_id: CHAT_ID, text: text, parse_mode: 'HTML'})
+  });
+
+  alert('Dziękujemy! Potwierdzimy rezerwację w ciągu 24h.');
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon"></span>
+  <span class="toast-text" id="toastText"></span>
+</div>
+
+<script>
+// ======== DATA ========
+let requests = [
+  { id:1, name:'Anna Kowalska', phone:'+48 512 345 678', email:'anna@mail.com', workshop:'Wieczór ceramiczny', date:'2025-07-15', persons:4, message:'Wieczór panieński dla przyjaciółki!', status:'new', created:'2025-07-08' },
+  { id:2, name:'Tomasz Nowak', phone:'+48 601 234 567', email:'tomek@mail.com', workshop:'Dzień z gliną', date:'2025-07-20', persons:2, message:'', status:'new', created:'2025-07-07' },
+  { id:3, name:'Maria Wiśniewska', phone:'+48 505 678 901', email:'maria.w@mail.com', workshop:'Kurs podstawowy', date:'2025-07-22', persons:1, message:'Chcę zacząć od podstaw', status:'new', created:'2025-07-07' },
+  { id:4, name:'Karolina Zielińska', phone:'+48 512 111 222', email:'karolina@mail.com', workshop:'Mała Pracownia', date:'2025-07-10', persons:3, message:'3 dzieci, wiek 7-10', status:'confirmed', created:'2025-07-03' },
+  { id:5, name:'Piotr Lewandowski', phone:'+48 600 333 444', email:'piotr.l@mail.com', workshop:'Wieczór ceramiczny', date:'2025-07-12', persons:6, message:'Team building', status:'confirmed', created:'2025-07-02' },
+  { id:6, name:'Agnieszka Kamińska', phone:'+48 511 555 666', email:'agnieszka@mail.com', workshop:'Rodzina w glinie', date:'2025-07-08', persons:4, message:'', status:'confirmed', created:'2025-06-28' },
+  { id:7, name:'Jan Wójcik', phone:'+48 502 777 888', email:'jan.w@mail.com', workshop:'Dzień z gliną', date:'2025-07-05', persons:1, message:'', status:'done', created:'2025-06-25' },
+  { id:8, name:'Ewa Szymańska', phone:'+48 504 999 111', email:'ewa.sz@mail.com', workshop:'Mała Pracownia', date:'2025-07-03', persons:5, message:'Urodziny córki', status:'done', created:'2025-06-22' },
+  { id:9, name:'Michał Dąbrowski', phone:'+48 510 222 333', email:'michal@mail.com', workshop:'Wieczór ceramiczny', date:'2025-06-28', persons:2, message:'', status:'done', created:'2025-06-20' },
+  { id:10, name:'Natalia Kozłowska', phone:'+48 507 444 555', email:'natalia@mail.com', workshop:'Kurs podstawowy', date:'2025-07-01', persons:1, message:'', status:'done', created:'2025-06-18' },
+  { id:11, name:'Robert Jankowski', phone:'+48 503 666 777', email:'robert.j@mail.com', workshop:'Dzień z gliną', date:'2025-06-30', persons:2, message:'Nie mogę w ten dzień', status:'cancelled', created:'2025-06-15' },
+  { id:12, name:'Aleksandra Mazur', phone:'+48 509 888 999', email:'ola.m@mail.com', workshop:'Wieczór ceramiczny', date:'2025-06-25', persons:8, message:'', status:'cancelled', created:'2025-06-12' },
+];
+
+let currentFilter = 'all';
+
+// ======== SIDEBAR ========
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+function showPanel(id, navEl) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  // Update topbar title
+  const titles = { dashboard:'Dashboard', requests:'Заявки', workshops:'Warsztaty', telegram:'Telegram Bot', settings:'Ustawienia' };
+  const tb = document.querySelector('.topbar-title');
+  if(tb) tb.innerHTML = titles[id] ? titles[id].replace(/([\wа-яА-Я]+)$/, '<em>$1</em>') : id;
+  // Close mobile sidebar
+  if(window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+}
+
+// ======== STATUS HELPERS ========
+const statusMap = { new:'Nowa', confirmed:'Potwierdzona', done:'Zrealizowana', cancelled:'Anulowana' };
+function statusBadge(s) { return `<span class="status-badge status-${s}">${statusMap[s]}</span>`; }
+
+// ======== RENDER TABLES ========
+function getFiltered() {
+  let data = requests;
+  if(currentFilter !== 'all') data = data.filter(r => r.status === currentFilter);
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  if(q) data = data.filter(r => r.name.toLowerCase().includes(q) || r.workshop.toLowerCase().includes(q) || r.email.toLowerCase().includes(q));
+  return data;
+}
+
+function renderDashboard() {
+  const recent = requests.slice(0, 5);
+  let html = `<table><thead><tr><th>Imię</th><th>Warsztat</th><th>Data</th><th>Status</th><th></th></tr></thead><tbody>`;
+  recent.forEach(r => {
+    html += `<tr>
+      <td class="td-name">${r.name}</td>
+      <td class="td-workshop">${r.workshop}</td>
+      <td>${r.date}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td><button class="row-action" onclick="openDetail(${r.id})">👁</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('dashboardTable').innerHTML = html;
+
+  // Mobile cards
+  let cards = '';
+  recent.forEach(r => {
+    cards += `<div class="m-card" onclick="openDetail(${r.id})">
+      <div class="m-card-top"><span class="m-card-name">${r.name}</span>${statusBadge(r.status)}</div>
+      <div class="m-card-row"><span class="m-card-workshop">${r.workshop}</span><span>${r.date}</span></div>
+    </div>`;
+  });
+  document.getElementById('dashboardCards').innerHTML = cards;
+
+  // Update stats
+  document.getElementById('stat-total').textContent = requests.length;
+  document.getElementById('stat-new').textContent = requests.filter(r=>r.status==='new').length;
+  document.getElementById('stat-confirmed').textContent = requests.filter(r=>r.status==='confirmed').length;
+  const rev = requests.filter(r=>r.status==='confirmed'||r.status==='done').reduce((s,r) => {
+    const prices = {'Mała Pracownia':150,'Dzień z gliną':250,'Wieczór ceramiczny':200,'Rodzina w glinie':350,'Kurs podstawowy':900};
+    return s + (prices[r.workshop]||0) * r.persons;
+  }, 0);
+  document.getElementById('stat-revenue').textContent = rev.toLocaleString('pl-PL');
+  document.getElementById('newRequestsBadge').textContent = requests.filter(r=>r.status==='new').length;
+}
+
+function renderRequests() {
+  const data = getFiltered();
+  let html = `<table><thead><tr><th>Imię</th><th>Telefon</th><th>Warsztat</th><th>Data</th><th>Osoby</th><th>Status</th><th>Akcje</th></tr></thead><tbody>`;
+  if(!data.length) {
+    html += `<tr><td colspan="7" style="text-align:center;padding:40px;color:rgba(245,240,232,0.3);">Brak wyników</td></tr>`;
+  }
+  data.forEach(r => {
+    html += `<tr>
+      <td class="td-name">${r.name}</td>
+      <td>${r.phone}</td>
+      <td class="td-workshop">${r.workshop}</td>
+      <td>${r.date}</td>
+      <td>${r.persons}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td><div class="row-actions">
+        <button class="row-action" onclick="openDetail(${r.id})" title="Szczegóły">👁</button>
+        <button class="row-action danger" onclick="deleteRequest(${r.id})" title="Usuń">🗑</button>
+      </div></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('requestsTable').innerHTML = html;
+
+  // Mobile cards
+  let cards = '';
+  data.forEach(r => {
+    cards += `<div class="m-card" onclick="openDetail(${r.id})">
+      <div class="m-card-top"><span class="m-card-name">${r.name}</span>${statusBadge(r.status)}</div>
+      <div class="m-card-row"><span class="m-card-workshop">${r.workshop}</span><span>${r.date}</span></div>
+      <div class="m-card-row"><span>${r.phone}</span><span>${r.persons} os.</span></div>
+    </div>`;
+  });
+  document.getElementById('requestsCards').innerHTML = cards;
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRequests();
+}
+
+// ======== DETAIL MODAL ========
+function openDetail(id) {
+  const r = requests.find(x => x.id === id);
+  if(!r) return;
+  const m = document.getElementById('modalContent');
+  m.innerHTML = `
+    <div class="modal-head">
+      <h3>Заявка #${r.id}</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-row"><span class="detail-label">Imię</span><span class="detail-value">${r.name}</span></div>
+      <div class="detail-row"><span class="detail-label">Telefon</span><span class="detail-value"><a href="tel:${r.phone}" style="color:var(--clay);text-decoration:none;">${r.phone}</a></span></div>
+      <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value"><a href="mailto:${r.email}" style="color:var(--clay);text-decoration:none;">${r.email}</a></span></div>
+      <div class="detail-row"><span class="detail-label">Warsztat</span><span class="detail-value" style="color:var(--clay)">${r.workshop}</span></div>
+      <div class="detail-row"><span class="detail-label">Data</span><span class="detail-value">${r.date}</span></div>
+      <div class="detail-row"><span class="detail-label">Osoby</span><span class="detail-value">${r.persons}</span></div>
+      <div class="detail-row"><span class="detail-label">Wiadomość</span><span class="detail-value">${r.message || '—'}</span></div>
+      <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${statusBadge(r.status)}</span></div>
+      <div class="detail-row"><span class="detail-label">Utworzono</span><span class="detail-value">${r.created}</span></div>
+    </div>
+    <div class="modal-actions">
+      ${r.status==='new'?'<button class="modal-btn primary" onclick="changeStatus('+r.id+',\'confirmed\')">✅ Potwierdź</button>':''}
+      ${r.status==='confirmed'?'<button class="modal-btn primary" onclick="changeStatus('+r.id+',\'done\')">✔️ Zrealizowano</button>':''}
+      ${r.status!=='cancelled'?'<button class="modal-btn danger" onclick="changeStatus('+r.id+',\'cancelled\')">✕ Anuluj</button>':''}
+      <button class="modal-btn secondary" onclick="closeModal()">Zamknij</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function changeStatus(id, status) {
+  const r = requests.find(x => x.id === id);
+  if(r) {
+    r.status = status;
+    showToast('✅', `Status zmieniony na: ${statusMap[status]}`);
+    renderDashboard();
+    renderRequests();
+    closeModal();
+    sendTelegramNotification(`📋 Status заявки #${id} (${r.name}) изменён на: ${statusMap[status]}`);
+  }
+}
+
+function deleteRequest(id) {
+  if(confirm('Czy na pewno chcesz usunąć tę zaявkę?')) {
+    requests = requests.filter(r => r.id !== id);
+    showToast('🗑', 'Заявка удалена');
+    renderDashboard();
+    renderRequests();
+  }
+}
+
+// ======== TELEGRAM ========
+let tgConfig = { token:'', chatId:'', connected:false };
+
+function connectTelegram() {
+  const token = document.getElementById('tgToken').value.trim();
+  const chatId = document.getElementById('tgChatId').value.trim();
+  if(!token || !chatId) {
+    showToast('⚠️', 'Заполните Token и Chat ID');
+    return;
+  }
+  tgConfig = { token, chatId, connected:true };
+  localStorage.setItem('dragona_tg', JSON.stringify(tgConfig));
+  updateTgStatus();
+  showToast('✅', 'Telegram подключён!');
+}
+
+function testTelegram() {
+  if(!tgConfig.connected) {
+    showToast('⚠️', 'Сначала подключите Telegram');
+    return;
+  }
+  sendTelegramNotification('🧪 Тестовое уведомление от Dragona Admin Panel!\n\nВсё работает корректно ✅');
+}
+
+function sendTelegramNotification(text) {
+  if(!tgConfig.connected) return;
+  fetch(`https://api.telegram.org/bot${tgConfig.token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: tgConfig.chatId, text: text, parse_mode: 'HTML' })
+  }).then(r => r.json()).then(data => {
+    if(!data.ok) console.warn('Telegram error:', data);
+  }).catch(err => console.warn('Telegram send error:', err));
+}
+
+function updateTgStatus() {
+  const el = document.getElementById('tgStatus');
+  if(tgConfig.connected) {
+    el.className = 'tg-status connected';
+    el.innerHTML = '✅ Telegram подключён';
+  } else {
+    el.className = 'tg-status disconnected';
+    el.innerHTML = '⚠️ Telegram не подключён';
+  }
+}
+
+// Load saved config
+try {
+  const saved = localStorage.getItem('dragona_tg');
+  if(saved) {
+    tgConfig = JSON.parse(saved);
+    if(tgConfig.token) document.getElementById('tgToken').value = tgConfig.token;
+    if(tgConfig.chatId) document.getElementById('tgChatId').value = tgConfig.chatId;
+    updateTgStatus();
+  }
+} catch(e) {}
+
+// ======== TOAST ========
+function showToast(icon, text) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastText').textContent = text;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ======== INIT ========
+renderDashboard();
+renderRequests();
+
+// Keyboard: Escape to close modal
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+</script>
+</body>
+</html>
