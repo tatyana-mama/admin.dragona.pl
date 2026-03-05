@@ -2,10 +2,100 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzFhMTQxMCIvPgogIDxlbGxpcHNlIGN4PSIxNiIgY3k9IjE2IiByeD0iMTEiIHJ5PSIxMiIgZmlsbD0iI2M0OTU2YSIgb3BhY2l0eT0iMC43Ii8+CiAgPHRleHQgeD0iMTYiIHk9IjIxIiBmb250LWZhbWlseT0iR2VvcmdpYSxzZXJpZiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjQwMCIgZm9udC1zdHlsZT0iaXRhbGljIiBmaWxsPSIjZjVmMGU4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5EQTwvdGV4dD4KPC9zdmc+">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dragona — Panel Administracyjny</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── LOGIN SCREEN ─────────────────────────── */
+#login-screen {
+  position:fixed;inset:0;z-index:9999;
+  background:var(--dark3);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+}
+#login-screen.hidden{display:none;}
+.login-bg {
+  position:absolute;inset:0;overflow:hidden;pointer-events:none;
+}
+.login-bg canvas{position:absolute;inset:0;width:100%;height:100%;}
+.login-box {
+  position:relative;z-index:2;
+  width:360px;
+  background:rgba(26,35,48,0.92);
+  border:1px solid rgba(142,176,212,0.15);
+  border-radius:16px;
+  padding:44px 40px 40px;
+  backdrop-filter:blur(20px);
+  box-shadow:0 0 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(142,176,212,0.05);
+}
+.login-logo {
+  text-align:center;margin-bottom:32px;
+}
+.login-logo-word {
+  font-family:'Cormorant Garamond',serif;
+  font-size:2rem;font-weight:500;letter-spacing:0.2em;
+  color:var(--cream);text-transform:uppercase;
+}
+.login-logo-word em{color:var(--blue);font-style:italic;}
+.login-badge {
+  display:inline-block;
+  font-size:0.55rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;
+  color:rgba(142,176,212,0.5);
+  border:1px solid rgba(142,176,212,0.15);
+  padding:3px 10px;border-radius:4px;margin-top:6px;
+}
+.login-field {
+  margin-bottom:16px;
+}
+.login-field label {
+  display:block;font-size:0.68rem;font-weight:600;letter-spacing:0.12em;
+  text-transform:uppercase;color:rgba(200,218,240,0.38);margin-bottom:7px;
+}
+.login-field input {
+  width:100%;padding:11px 14px;
+  background:rgba(200,218,240,0.04);
+  border:1px solid rgba(200,218,240,0.1);
+  border-radius:8px;color:var(--cream);font-family:'Jost',sans-serif;font-size:0.93rem;
+  outline:none;transition:border-color 0.2s;
+}
+.login-field input:focus{border-color:rgba(142,176,212,0.4);}
+.login-field input.error{border-color:rgba(196,96,96,0.6);}
+.login-btn {
+  width:100%;padding:12px;margin-top:8px;
+  background:rgba(142,176,212,0.12);
+  border:1px solid rgba(142,176,212,0.2);
+  border-radius:8px;color:var(--cream);
+  font-family:'Jost',sans-serif;font-size:0.9rem;font-weight:500;letter-spacing:0.08em;
+  cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;
+}
+.login-btn:hover{background:rgba(142,176,212,0.2);border-color:rgba(142,176,212,0.35);}
+.login-btn:active{transform:scale(0.98);}
+.login-btn.loading{pointer-events:none;color:transparent;}
+.login-btn.loading::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(142,176,212,0.2),transparent);
+  animation:loginShimmer 1.2s infinite;
+}
+@keyframes loginShimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.login-error {
+  margin-top:12px;padding:10px 14px;
+  background:rgba(196,96,96,0.08);border:1px solid rgba(196,96,96,0.2);
+  border-radius:6px;color:#e07070;font-size:0.82rem;text-align:center;
+  display:none;
+}
+.login-error.show{display:block;}
+.login-attempts {
+  text-align:center;margin-top:10px;
+  font-size:0.72rem;color:rgba(200,218,240,0.25);
+}
+.login-lock {
+  text-align:center;padding:20px 0;
+  color:rgba(196,96,96,0.7);font-size:0.88rem;
+}
+/* hex stream on bg */
+.hex-stream{position:absolute;top:0;font-family:monospace;font-size:11px;color:rgba(142,176,212,0.06);line-height:1.6;white-space:nowrap;pointer-events:none;animation:hexFall linear infinite;}
+@keyframes hexFall{from{transform:translateY(-100%)}to{transform:translateY(100vh)}}
+</style>
 <style>
 :root {
   --white:    #FFFFFF;
@@ -435,6 +525,36 @@ tr:hover td{background:rgba(200,218,240,0.02);}
 </head>
 <body>
 
+<!-- ══════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-bg" id="loginBg"></div>
+  <div class="login-box" id="loginBox">
+    <div class="login-logo">
+      <div class="login-logo-word">Drag<em>ona</em></div>
+      <div class="login-badge">Admin Panel · Secure Access</div>
+    </div>
+    <div id="loginForm">
+      <div class="login-field">
+        <label>Login</label>
+        <input type="text" id="loginUser" placeholder="admin" autocomplete="username" spellcheck="false">
+      </div>
+      <div class="login-field">
+        <label>Hasło</label>
+        <input type="password" id="loginPass" placeholder="••••••••••••" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">Zaloguj się →</button>
+      <div class="login-error" id="loginError">Nieprawidłowy login lub hasło</div>
+      <div class="login-attempts" id="loginAttempts"></div>
+    </div>
+    <div class="login-lock" id="loginLock" style="display:none">
+      🔒 Za dużo prób. Odblokowanie za <span id="lockCountdown">60</span>s
+    </div>
+  </div>
+</div>
+
 <!-- MOBILE HEADER -->
 <div class="mobile-header">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
@@ -561,23 +681,11 @@ tr:hover td{background:rgba(200,218,240,0.02);}
 
     <!-- WORKSHOPS -->
     <div class="panel" id="panel-workshops">
-      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
-        <div class="stat-card"><div class="stat-icon">🌿</div><div class="stat-number">4</div><div class="stat-label">Mała Pracownia</div><div class="stat-change up">↑ Popularne</div></div>
-        <div class="stat-card"><div class="stat-icon">🌊</div><div class="stat-number">3</div><div class="stat-label">Dzień z gliną</div></div>
-        <div class="stat-card"><div class="stat-icon">🕯️</div><div class="stat-number">5</div><div class="stat-label">Wieczór ceramiczny</div><div class="stat-change up">↑ TOP</div></div>
-        <div class="stat-card"><div class="stat-icon">🤝</div><div class="stat-number">2</div><div class="stat-label">Rodzina w glinie</div></div>
-        <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-number">1</div><div class="stat-label">Kurs podstawowy</div></div>
-      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(170px,1fr));" id="ws-stats"></div>
       <div class="settings-card">
         <h3>Cennik warsztatów</h3>
-        <p>Obecny cennik wyświetlany na stronie.</p>
-        <table style="width:100%;max-width:500px;">
-          <tr><td style="padding:8px 0;color:var(--blue);border-top:1px solid rgba(200,218,240,0.06);">Mała Pracownia</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(200,218,240,0.06);">150 zł / dziecko</td></tr>
-          <tr><td style="padding:8px 0;color:var(--blue);border-top:1px solid rgba(200,218,240,0.06);">Dzień z gliną</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(200,218,240,0.06);">250 zł / osoba</td></tr>
-          <tr><td style="padding:8px 0;color:var(--blue);border-top:1px solid rgba(200,218,240,0.06);">Wieczór ceramiczny</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(200,218,240,0.06);">200 zł / osoba</td></tr>
-          <tr><td style="padding:8px 0;color:var(--blue);border-top:1px solid rgba(200,218,240,0.06);">Rodzina w glinie</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(200,218,240,0.06);">350 zł / rodzina</td></tr>
-          <tr><td style="padding:8px 0;color:var(--blue);border-top:1px solid rgba(200,218,240,0.06);">Kurs podstawowy</td><td style="padding:8px 0;text-align:right;border-top:1px solid rgba(200,218,240,0.06);">900 zł / kurs</td></tr>
-        </table>
+        <p>Edytuj ceny — zmiany są widoczne natychmiast w statystykach przychodu.</p>
+        <table style="width:100%;max-width:520px;" id="ws-prices"></table>
       </div>
     </div>
 
@@ -605,8 +713,9 @@ tr:hover td{background:rgba(200,218,240,0.02);}
           <div class="settings-hint">Ваш Telegram Chat ID (числовой)</div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
-          <button class="settings-btn" onclick="connectTelegram()">🔗 Подключить</button>
-          <button class="settings-btn secondary" onclick="testTelegram()">📤 Тест уведомления</button>
+          <button class="settings-btn" onclick="connectTelegram()">🔗 Podłącz</button>
+          <button class="settings-btn secondary" onclick="testTelegram()">📤 Test</button>
+          <button class="settings-btn secondary" onclick="sendTgInstructions()">📋 Wyślij instrukcję</button>
         </div>
         <div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(200,218,240,0.06);">
           <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(200,218,240,0.4);margin-bottom:14px;">Настройки уведомлений</div>
@@ -620,38 +729,25 @@ tr:hover td{background:rgba(200,218,240,0.02);}
     <!-- SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="settings-card">
-        <h3>Общие настройки</h3>
-        <p>Основные настройки панели администрирования.</p>
-        <div class="settings-form-group"><label class="settings-label">Имя администратора</label><input type="text" class="settings-input" value="Daria Dragun"></div>
-        <div class="settings-form-group"><label class="settings-label">Email для уведомлений</label><input type="email" class="settings-input" placeholder="dragona@email.com"></div>
-        <div class="settings-form-group"><label class="settings-label">Телефон</label><input type="tel" class="settings-input" placeholder="+48 000 000 000"></div>
-        <button class="settings-btn" onclick="showToast('✅','Настройки сохранены')">Сохранить</button>
+        <h3>Profil administratora</h3>
+        <p>Dane kontaktowe i ustawienia konta.</p>
+        <div class="settings-form-group"><label class="settings-label">Imię administratora</label><input type="text" class="settings-input" id="s-name" placeholder="Daria Dragun"></div>
+        <div class="settings-form-group"><label class="settings-label">Email</label><input type="email" class="settings-input" id="s-email" placeholder="dragona@email.com"></div>
+        <div class="settings-form-group"><label class="settings-label">Telefon</label><input type="tel" class="settings-input" id="s-phone" placeholder="+48 000 000 000"></div>
+        <button class="settings-btn" onclick="saveSettings()">💾 Zapisz ustawienia</button>
       </div>
       <div class="settings-card">
-        <h3>Интеграция с сайтом</h3>
-        <p>Добавьте этот скрипт в файл dragona_main.html, чтобы заявки отправлялись в Telegram.</p>
-        <div style="background:rgba(200,218,240,0.03);border:1px solid rgba(200,218,240,0.08);border-radius:8px;padding:16px;overflow-x:auto;">
-          <pre style="color:var(--blue);font-size:0.76rem;line-height:1.7;white-space:pre-wrap;word-break:break-all;"><code>function submitForm() {
-  const name = document.querySelector('input[placeholder="Anna Kowalska"]').value;
-  const phone = document.querySelector('input[type="tel"]').value;
-  const email = document.querySelector('input[type="email"]').value;
-  const workshop = document.querySelector('select').value;
-  const date = document.querySelector('input[type="date"]').value;
-  const persons = document.querySelector('input[type="number"]').value;
-  const message = document.querySelector('textarea').value;
-
-  const TOKEN = 'ВАШ_BOT_TOKEN';
-  const CHAT_ID = 'ВАШ_CHAT_ID';
-  const text = `📩 Nowa zaявka!\n\n👤 ${name}\n📱 ${phone}\n✉️ ${email}\n🏺 ${workshop}\n📅 ${date}\n👥 ${persons} os.\n💬 ${message}`;
-
-  fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({chat_id: CHAT_ID, text, parse_mode: 'HTML'})
-  });
-  alert('Dziękujemy! Potwierdzimy rezerwację w ciągu 24h.');
-}</code></pre>
-        </div>
+        <h3>🔒 Zmiana hasła</h3>
+        <p>Hasło jest szyfrowane SHA-256. Nie jest przechowywane w otwartym tekście.</p>
+        <div class="settings-form-group"><label class="settings-label">Obecne hasło</label><input type="password" class="settings-input" id="s-cur-pass" placeholder="••••••••"></div>
+        <div class="settings-form-group"><label class="settings-label">Nowe hasło</label><input type="password" class="settings-input" id="s-new-pass" placeholder="min. 8 znaków"></div>
+        <div class="settings-form-group"><label class="settings-label">Powtórz nowe hasło</label><input type="password" class="settings-input" id="s-conf-pass" placeholder="••••••••"></div>
+        <button class="settings-btn" onclick="changePassword()">🔑 Zmień hasło</button>
+      </div>
+      <div class="settings-card">
+        <h3>Sesja</h3>
+        <p>Wyloguj się z panelu administracyjnego.</p>
+        <button class="settings-btn secondary" onclick="logout()">🚪 Wyloguj się</button>
       </div>
     </div>
 
@@ -840,14 +936,284 @@ function showToast(icon,text){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// Init
-try{
-  const saved=localStorage.getItem('dragona_tg');
-  if(saved){tgConfig=JSON.parse(saved);if(tgConfig.token)document.getElementById('tgToken').value=tgConfig.token;if(tgConfig.chatId)document.getElementById('tgChatId').value=tgConfig.chatId;updateTgStatus();}
-}catch(e){}
+// ══════════════════════════════════════════
+// LOGIN SYSTEM
+// ══════════════════════════════════════════
+const CORRECT_USER = 'admin';
+// SHA-256 of password — never store plaintext
+const CORRECT_HASH = '525272419be8a4a17e87738400a69cd16363ce642a5b4efedad166e97319fbb0';
+const MAX_ATTEMPTS = 5;
+const LOCK_SECONDS = 60;
 
-renderDashboard();
-renderRequests();
+let loginAttempts = 0;
+let lockUntil = 0;
+let lockTimer = null;
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin() {
+  const now = Date.now();
+  if (now < lockUntil) return;
+
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn  = document.getElementById('loginBtn');
+
+  btn.classList.add('loading');
+  btn.textContent = '';
+
+  // artificial delay — anti-brute UX
+  await new Promise(r => setTimeout(r, 800 + Math.random()*400));
+
+  const hash = await sha256(pass);
+  btn.classList.remove('loading');
+  btn.textContent = 'Zaloguj się →';
+
+  if (user === CORRECT_USER && hash === CORRECT_HASH) {
+    loginAttempts = 0;
+    // animate login box out
+    const box = document.getElementById('loginBox');
+    box.style.transition = 'opacity 0.4s, transform 0.4s';
+    box.style.opacity = '0';
+    box.style.transform = 'scale(0.96)';
+    setTimeout(() => {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.body.style.overflow = '';
+      initApp();
+    }, 400);
+  } else {
+    loginAttempts++;
+    const rem = MAX_ATTEMPTS - loginAttempts;
+    const errEl = document.getElementById('loginError');
+    const attEl = document.getElementById('loginAttempts');
+    errEl.classList.add('show');
+    document.getElementById('loginUser').classList.add('error');
+    document.getElementById('loginPass').classList.add('error');
+    document.getElementById('loginPass').value = '';
+
+    // shake animation
+    const box = document.getElementById('loginBox');
+    box.style.animation = 'none';
+    box.offsetHeight; // reflow
+    box.style.animation = 'loginShake 0.4s ease';
+
+    if (loginAttempts >= MAX_ATTEMPTS) {
+      lockUntil = Date.now() + LOCK_SECONDS * 1000;
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('loginLock').style.display = 'block';
+      startLockCountdown();
+      attEl.textContent = '';
+    } else {
+      attEl.textContent = rem > 0 ? `Pozostałe próby: ${rem}` : '';
+    }
+  }
+}
+
+function startLockCountdown() {
+  const el = document.getElementById('lockCountdown');
+  lockTimer = setInterval(() => {
+    const rem = Math.ceil((lockUntil - Date.now()) / 1000);
+    if (rem <= 0) {
+      clearInterval(lockTimer);
+      loginAttempts = 0;
+      lockUntil = 0;
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('loginLock').style.display = 'none';
+      document.getElementById('loginError').classList.remove('show');
+      document.getElementById('loginUser').classList.remove('error');
+      document.getElementById('loginPass').classList.remove('error');
+      document.getElementById('loginAttempts').textContent = '';
+    } else {
+      if(el) el.textContent = rem;
+    }
+  }, 500);
+}
+
+// Hex stream background
+function initLoginBg() {
+  const bg = document.getElementById('loginBg');
+  const chars = '0123456789ABCDEF ';
+  for (let i = 0; i < 18; i++) {
+    const col = document.createElement('div');
+    col.className = 'hex-stream';
+    col.style.left = (i * 5.8) + '%';
+    col.style.animationDuration = (8 + Math.random() * 14) + 's';
+    col.style.animationDelay = (-Math.random() * 20) + 's';
+    col.style.fontSize = (9 + Math.random() * 4) + 'px';
+    let txt = '';
+    for (let j = 0; j < 120; j++) txt += chars[Math.floor(Math.random()*chars.length)] + (j%8===7?'\n':'');
+    col.textContent = txt;
+    bg.appendChild(col);
+  }
+}
+
+// Add shake keyframe dynamically
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = '@keyframes loginShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}';
+document.head.appendChild(shakeStyle);
+
+// ══════════════════════════════════════════
+// WORKSHOPS — live editing
+// ══════════════════════════════════════════
+const workshopPrices = {
+  'Mała Pracownia':     { price: 150, unit: 'dziecko', icon: '🌿', bookings: 0 },
+  'Dzień z gliną':      { price: 250, unit: 'osoba',   icon: '🌊', bookings: 0 },
+  'Wieczór ceramiczny': { price: 200, unit: 'osoba',   icon: '🕯️', bookings: 0 },
+  'Rodzina w glinie':   { price: 350, unit: 'rodzina', icon: '🤝', bookings: 0 },
+  'Kurs podstawowy':    { price: 900, unit: 'kurs',    icon: '🔥', bookings: 0 },
+};
+
+function renderWorkshops() {
+  // count bookings from requests
+  Object.keys(workshopPrices).forEach(k => workshopPrices[k].bookings = 0);
+  requests.forEach(r => { if(workshopPrices[r.workshop]) workshopPrices[r.workshop].bookings++; });
+
+  const top = Object.entries(workshopPrices).sort((a,b)=>b[1].bookings-a[1].bookings);
+
+  // stats
+  document.getElementById('ws-stats').innerHTML = top.map(([name,d]) =>
+    `<div class="stat-card">
+      <div class="stat-icon">${d.icon}</div>
+      <div class="stat-number">${d.bookings}</div>
+      <div class="stat-label">${name}</div>
+      ${d.bookings===top[0][1].bookings&&d.bookings>0?'<div class="stat-change up">↑ TOP</div>':''}
+    </div>`
+  ).join('');
+
+  // price editor
+  document.getElementById('ws-prices').innerHTML = Object.entries(workshopPrices).map(([name,d]) =>
+    `<tr>
+      <td style="padding:10px 0;color:var(--blue);border-top:1px solid rgba(200,218,240,0.06);">${d.icon} ${name}</td>
+      <td style="padding:10px 0;border-top:1px solid rgba(200,218,240,0.06);">
+        <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+          <input type="number" value="${d.price}" min="0" step="10" data-ws="${name}"
+            style="width:90px;padding:6px 10px;background:rgba(200,218,240,0.05);border:1px solid rgba(200,218,240,0.12);border-radius:6px;color:var(--cream);font-family:'Jost',sans-serif;font-size:0.9rem;text-align:right;"
+            onchange="updatePrice('${name}',this.value)">
+          <span style="color:rgba(200,218,240,0.4);font-size:0.82rem;">zł / ${d.unit}</span>
+        </div>
+      </td>
+    </tr>`
+  ).join('');
+}
+
+function updatePrice(name, val) {
+  if(workshopPrices[name]) {
+    workshopPrices[name].price = parseInt(val)||0;
+    showToast('💶', `Cena zaktualizowana: ${name}`);
+    renderDashboard(); // refresh revenue
+  }
+}
+
+// ══════════════════════════════════════════
+// SETTINGS — save to localStorage
+// ══════════════════════════════════════════
+function saveSettings() {
+  const s = {
+    adminName:  document.getElementById('s-name').value,
+    adminEmail: document.getElementById('s-email').value,
+    adminPhone: document.getElementById('s-phone').value,
+  };
+  try{ localStorage.setItem('dragona_settings', JSON.stringify(s)); }catch(e){}
+  showToast('✅','Ustawienia zapisane');
+}
+
+function loadSettings() {
+  try{
+    const s = JSON.parse(localStorage.getItem('dragona_settings')||'{}');
+    if(document.getElementById('s-name'))  document.getElementById('s-name').value  = s.adminName  || '';
+    if(document.getElementById('s-email')) document.getElementById('s-email').value = s.adminEmail || '';
+    if(document.getElementById('s-phone')) document.getElementById('s-phone').value = s.adminPhone || '';
+  }catch(e){}
+}
+
+function changePassword() {
+  const cur  = document.getElementById('s-cur-pass').value;
+  const nw   = document.getElementById('s-new-pass').value;
+  const conf = document.getElementById('s-conf-pass').value;
+  if(!cur||!nw||!conf){ showToast('⚠️','Wypełnij wszystkie pola'); return; }
+  if(nw !== conf){ showToast('⚠️','Nowe hasła nie są identyczne'); return; }
+  if(nw.length < 8){ showToast('⚠️','Hasło min. 8 znaków'); return; }
+  sha256(cur).then(h => {
+    if(h !== CORRECT_HASH){ showToast('❌','Nieprawidłowe obecne hasło'); return; }
+    sha256(nw).then(nh => {
+      // In production: send to server. Here: show new hash for update.
+      showToast('✅',`Nowe hasło ustawione (hash: ${nh.slice(0,12)}…)`);
+      document.getElementById('s-cur-pass').value='';
+      document.getElementById('s-new-pass').value='';
+      document.getElementById('s-conf-pass').value='';
+    });
+  });
+}
+
+function logout() {
+  if(confirm('Wylogować się?')) {
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('loginForm').style.display='block';
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginError').classList.remove('show');
+    const box=document.getElementById('loginBox');
+    box.style.opacity='1';box.style.transform='scale(1)';
+  }
+}
+
+// ══════════════════════════════════════════
+// TELEGRAM — send instructions message
+// ══════════════════════════════════════════
+function sendTgInstructions() {
+  if(!tgConfig.connected){ showToast('⚠️','Najpierw podłącz Telegram'); return; }
+  const text =
+`🐉 <b>Dragona Admin — Instrukcja połączenia</b>
+
+Panel administracyjny Dragona jest połączony z tym botem.
+
+📋 <b>Co będziesz otrzymywać:</b>
+• 📩 Nowe zgłoszenia z formularza
+• ✅ Zmiany statusu rezerwacji
+• 📊 Dzienna soodka (jeśli włączona)
+
+⚙️ <b>Jak zarządzać:</b>
+Otwórz panel: <a href="https://admin.dragona.pl">admin.dragona.pl</a>
+
+🔒 Połączenie aktywne — bot gotowy do pracy!`;
+
+  fetch(`https://api.telegram.org/bot${tgConfig.token}/sendMessage`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ chat_id: tgConfig.chatId, text, parse_mode:'HTML', disable_web_page_preview:true })
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok) showToast('✅','Instrukcja wysłana do Telegram!');
+    else showToast('❌','Błąd: ' + (d.description||'nieznany'));
+  }).catch(()=>showToast('❌','Błąd połączenia z Telegram'));
+}
+
+// ══════════════════════════════════════════
+// INIT APP (called after login)
+// ══════════════════════════════════════════
+function initApp() {
+  try{
+    const saved=localStorage.getItem('dragona_tg');
+    if(saved){
+      tgConfig=JSON.parse(saved);
+      if(tgConfig.token && document.getElementById('tgToken'))
+        document.getElementById('tgToken').value=tgConfig.token;
+      if(tgConfig.chatId && document.getElementById('tgChatId'))
+        document.getElementById('tgChatId').value=tgConfig.chatId;
+      updateTgStatus();
+    }
+  }catch(e){}
+  loadSettings();
+  renderDashboard();
+  renderRequests();
+  renderWorkshops();
+}
+
+// ══════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════
+document.body.style.overflow = 'hidden'; // prevent scroll on login
+initLoginBg();
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 </script>
 </body>
